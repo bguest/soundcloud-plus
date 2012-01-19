@@ -11,7 +11,7 @@ describe SoundcloudPlus do
       end
    end
 
-   describe ".resolve" do
+   describe "#resolve" do
       before(:each){client.should_receive(:get).with("/resolve",:url => "http://example.com/poopman/poopy-track")}
       it{ client.resolve("http://example.com/poopman/poopy-track")}
       it{ client.resolve("poopman/poopy-track")}
@@ -48,16 +48,6 @@ describe SoundcloudPlus do
       end
    end
 
-   describe "#bogus_call" do
-      it "should add 'bogus_call' to path" do
-         client.user(1234).bogus_call
-         client.path.should == "/users/1234/bogus_calls"
-      end
-      it "should fetch after non-singular call" do
-         client.should_receive(:get).with("/users/1234/bogus_calls", PARAMS)
-         client.user(1234).bogus_calls
-      end
-   end
 
    %w(user track playlist group comment app).each do |method|
       describe "##{method}(1234)" do
@@ -83,6 +73,7 @@ describe SoundcloudPlus do
          end
       end
    end
+
 
 
    describe "s ability to chain calls together" do

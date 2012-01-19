@@ -5,29 +5,21 @@ require 'uri'
 
 class SoundcloudPlus < Soundcloud
 
-   attr_accessor :path, :options
+   attr_accessor :path , :options
 
+   PLURAL_CALLS   = %w(user track playlist group comment connection activity app following follower favorite favoriter email)
    SINGULAR_CALLS = %w(shared-to secret-token all own affiliated exclusive)
    PARAMETERS =     %w(limit order)
 
    def initialize(options={})
       super options
       @path = ""
-      @option = {}
    end
 
-   # Catch all for missing api calls 
+   # Call method on fetched results
    def method_missing(method, *args, &block)
-      if ! block 
-         call = method.to_s
-         plural = call.pluralize
-         if call.singular? || args[0]
-            return (args[1] ? attach(plural, args[0], args[1]) : attach(plural, args[0]))
-         else
-            return attach(plural).fetch!
-         end
-      end
-      raise NoMethodError
+      @results ||= self.fetch!
+      @results.send(method)
    end
 
    def me
@@ -38,7 +30,19 @@ class SoundcloudPlus < Soundcloud
    SINGULAR_CALLS.each do |call|
       class_eval <<-METHOD
          def #{call.gsub('-','_')}(value, options = {})
-            attach("#{call}",value)
+            attach("#{call}",value, options)
+         end
+      METHOD
+   end
+
+   PLURAL_CALLS.each do |call|
+      class_eval <<-METHOD
+         def #{call.pluralize}(value = nil, options = {})
+            attach("#{call.pluralize}", value, options).fetch!
+         end
+
+         def #{call}(value = nil, options = {})
+            attach("#{call.pluralize}", value, options)
          end
       METHOD
    end
@@ -56,8 +60,8 @@ class SoundcloudPlus < Soundcloud
       METHOD
    end
 
-   def attach(call, value = nil, options = {})
-      @path << "/#{call}"
+   def attach(method, value = nil, options = {})
+      @path << "/#{method}"
       @options.merge!(options)
       if value
          @path << (value.class == Fixnum ? "/#{value}" : "/#{resolve(value)}" )
@@ -69,13 +73,13 @@ class SoundcloudPlus < Soundcloud
       old_path = path
       if old_path
          path = ""
-         get(old_path, @options)
+         @results = get(old_path, @options)
       end
    end
 
    #
    def resolve(path)
-      path = URI.parse(path).path.sub(/^\/+/,'')
+      path = URI.parse(path).path.sub(/\A\/+/,'')
       url = "http://#{site}/#{path}"
       get("/resolve", :url => url)
    end
