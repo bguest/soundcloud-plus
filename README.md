@@ -31,8 +31,6 @@ This path must match the soundcloud web api. You can't do something like
 
     client.user(1234).comment(4321).track(2345) # Won't work
    
-and expect to get anything meaningfull
-
 ## Plural methods add resources to the api path and then fetch
 
 For example

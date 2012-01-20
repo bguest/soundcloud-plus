@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Benjamin Guest"]
   s.email       = ["benguest@gmaill.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Lightweight wrapper for a lightweight wrapper for the soundcloud api}
+  s.description = %q{makes calling soundcloud api simpler from ruby}
 
   s.rubyforge_project = "soundcloud-plus"
 
