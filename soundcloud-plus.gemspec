@@ -23,7 +23,8 @@ Gem::Specification.new do |s|
 
   # General Dependency's
   s.add_dependency "soundcloud", "~> 0.2.9"
-  s.add_dependency "active_support"
+  s.add_dependency "i18n"
+  s.add_dependency "activesupport"
 
   #Testing
   s.add_development_dependency "rspec"

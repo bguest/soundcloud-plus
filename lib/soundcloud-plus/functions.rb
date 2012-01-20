@@ -1,4 +1,4 @@
-require 'active_support/inflector'
+require "active_support/inflector"
 
 class String
 
@@ -10,6 +10,14 @@ class String
    #
    def singular?
       self.pluralize != self and self.singularize == self
+   end
+
+   def pluralize
+      ActiveSupport::Inflector.pluralize(self)
+   end
+
+   def singularize
+      ActiveSupport::Inflector.singularize(self)
    end
 
 end
