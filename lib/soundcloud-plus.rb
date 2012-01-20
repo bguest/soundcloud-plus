@@ -60,28 +60,68 @@ class SoundcloudPlus < Soundcloud
       METHOD
    end
 
-   def attach(method, value = nil, options = {})
-      @path << "/#{method}"
+   # Add parameters to the query options
+   #
+   # @example Adding limit to number of user returned
+   #   client = SoundcloudPlus.new(:client_id => "client_id")
+   #   client.user.where(:limit => 5)
+   #
+   # @return [SoundcloudPlus] self
+   #
+   def where(params = {})
+      @options.merge!(params)
+      self
+   end
+
+   # Attaches resource and resource id path
+   #
+   # @example Attach user resource to path
+   #   client = SoundcloudPlus.new(:client_id => "client_id")
+   #   client.attach("users", "bob")
+   #   client.path  # => /users/1234
+   #
+   # @return [ SoundcloudPlus ] self 
+   #
+   def attach(resource, value = nil, options = {})
+      @path << "/#{resource}"
       @options.merge!(options)
       if value
-         @path << (value.class == Fixnum ? "/#{value}" : "/#{resolve(value)}" )
+         @path << (value.class == Fixnum ? "/#{value}" : "/#{resolve(value).id}" )
       end
       self
    end
 
+   # Fetches resources from current path with current options
+   #
+   # @example Fetching user
+   #   client = SoundcloudPlus.new(:client_id => "client_id")
+   #   user = client.user(1234).fetch!
+   #   user.permalink # => "bob"
+   #
+   # @return [Hashie] Hashie containing resource from path
+   #
    def fetch!
       old_path = path
-      if old_path
+      if old_path && path.length > 0
          path = ""
          @results = get(old_path, @options)
       end
    end
+   alias :get! :fetch!
 
+   # Finds the soundcloud id for a soundcloud link or path
+   #
+   # @example Getting id of song with link
+   #   client = SoundcloudPlus.new(:client_id => "client_id")
+   #   track = client.resolve("http://soundcloud.com/poopyman/poopy-pants-song") 
+   #   track.name # => "Poopy Pants Song"
+   # 
+   # @example Getting id of song with 
    #
    def resolve(path)
       path = URI.parse(path).path.sub(/\A\/+/,'')
       url = "http://#{site}/#{path}"
-      get("/resolve", :url => url)
+      @results = get("/resolve", :url => url)
    end
 
 end

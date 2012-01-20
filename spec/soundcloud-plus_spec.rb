@@ -18,6 +18,13 @@ describe SoundcloudPlus do
       it{ client.resolve("/poopman/poopy-track")}
    end
 
+   describe "#fetch! (and alias)" do
+      before(:each){client.should_receive(:get).with("/tracks/1234",PARAMS)}
+      it{ client.track(1234).fetch!}
+      it{ client.tracks(1234)}
+      it{ client.track(1234).get!}
+   end
+
    describe "#me" do
       it "should add /me to path" do
          client.me
@@ -35,9 +42,10 @@ describe SoundcloudPlus do
          client.path.should == "/users/1234"
       end
       it "should add user with permalink only" do
-         client.stub!(:resolve).and_return(5432)
+         client.stub!(:resolve).and_return(client)
+         client.stub!(:id).and_return(1234)
          client.user("bob")
-         client.path.should == "/users/5432"
+         client.path.should == "/users/1234"
       end
    end
 
@@ -47,7 +55,6 @@ describe SoundcloudPlus do
          client.users
       end
    end
-
 
    %w(user track playlist group comment app).each do |method|
       describe "##{method}(1234)" do
@@ -65,16 +72,14 @@ describe SoundcloudPlus do
       end
    end
 
-   %w(shared_to).each do |method|
+   %w(shared_to secret_token all own exclusive).each do |method|
       describe "##{method}" do
          it "should add correct thing to path" do
             client.send(method, 1234)
-            client.path.should == "/shared-to/1234"
+            client.path.should == "/#{method.gsub('_','-')}/1234"
          end
       end
    end
-
-
 
    describe "s ability to chain calls together" do
       it "should chain track and comment together" do
@@ -82,6 +87,20 @@ describe SoundcloudPlus do
          client.path.should == "/tracks/1234/comments/5678"
       end
 
+   end
+
+   %w(limit order).each do |method|
+      it "should add parameter to options" do
+         client.send(method,"param")
+         client.options[method.to_sym].should == "param"
+      end
+   end
+
+   describe "#where" do
+      it "should add hash to parameters" do
+         client.where(:thing => "sweet")
+         client.options.should == PARAMS.merge({:thing => "sweet"})
+      end
    end
 
 end
