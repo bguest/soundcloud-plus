@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    soundcloud-plus (0.0.1)
+    soundcloud-plus (0.0.2)
       activesupport
       i18n
       soundcloud (~> 0.2.9)
